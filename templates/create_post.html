@@ -1,0 +1,122 @@
+{% extends "nav.html"%}
+{% block title %}{% endblock %}
+{% block content %}
+<h1 align="center">Start an Analysis</h1>
+<style>
+#file-data{
+    white-space: pre-wrap; 
+    word-wrap: break-word;
+}
+
+</style>   
+
+<form method="POST" enctype="multipart/form-data">
+    <label for="text">Description:</label>
+    <textarea name="text" id="text" class="form-control"></textarea>
+    <br>
+    <label for="file">File:</label>
+    <input type="file" name="file" id="file" class="form-control-file" onchange="validateFile()">
+    <br>
+    <div align="left" style="margin-top:20px">
+        <button type="submit" class="btn btn-lg btn-primary">submit</button>
+        <a href=#><button type="button" class="btn btn-lg ">Preprocess</button></a>
+        <a href=#><button type="button" class="btn btn-lg ">Sentiment</button></a>
+        <a href="\home"><button type="button" class="btn btn-lg btn-secondary">Back</button></a>
+    </div>
+    
+</form>
+<br>
+
+<!-- Display area for data read from uploaded file -->
+<div align="center" style="width:fit-content">
+    <label>Data from uploaded file:</label>
+    <pre id="file-data"></pre>
+</div>
+
+
+
+
+<!-- JavaScript to send form data to backend and display data from backend response -->
+<script>
+    function validateFile() {
+        var fileInput = document.getElementById('file');
+        var file = fileInput.files[0];
+
+        // Validate file size
+        var fileSize = file.size;
+        if (fileSize === 0) {
+            alert('Error: File size cannot be 0.');
+            fileInput.value = ''; // Reset file input
+            return;
+        }
+        if (fileSize > 5 * 1024 * 1024) {
+            alert('Error: File size cannot exceed 5 MB.');
+            fileInput.value = ''; // Reset file input
+            return;
+        }
+
+        // Validate file type
+        var allowedFileTypes = ['xls', 'xlsx', 'csv'];
+        var fileType = file.name.split('.').pop().toLowerCase();
+        if (!allowedFileTypes.includes(fileType)) {
+            alert('Error: Only files with xls, xlsx, or csv extensions are allowed.');
+            fileInput.value = ''; // Reset file input
+            return;
+        }
+
+
+
+        
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var fileInput = document.getElementById('file');
+            var file = fileInput.files[0];
+            var textarea = document.getElementById('text');
+            var textareaValue = textarea.value;
+       
+            if (!file) {
+                alert('Error: Please select a file to upload.');
+                return;
+            }
+
+            if (textareaValue=="") {
+                alert('Error: Please input Description to start.');
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('file', file);
+            formData.append('text', textareaValue);
+            
+            // Send form data to backend using fetch
+            fetch('/create-post', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                
+                var fileDataElement = document.getElementById('file-data');
+
+                // Convert the list of values to an HTML list
+                var listElement = document.createElement('ol');
+                data.forEach(function(item) {
+                    var listItemElement = document.createElement('li');
+                    listItemElement.textContent = item;
+                    listElement.appendChild(listItemElement);
+                });
+
+                // Append the HTML list to the file-data element
+                fileDataElement.appendChild(listElement);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+    
+}
+    
+</script>
+{% endblock %}

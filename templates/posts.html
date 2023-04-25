@@ -1,0 +1,23 @@
+{% extends "posts_div.html" %}
+{% block title %}{{ username }}'s evaluations{% endblock %}
+{% block header %}
+
+<h1 align="center">{{ username }}'s evaluations</h1>
+<div style="
+display: flex;
+justify-content: space-betw
+{% if username != current_user.username %}
+
+
+{% endif %}
+  <!-- Add a link to the user engagement page --> 
+  
+</div>  
+{% endblock %}
+
+{% block footer %}
+
+<div align="center">
+    <a href="\home"><button type="button" class="btn btn-primary btn-lg">Back</button></a>
+</div>
+{% endblock %}
