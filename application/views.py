@@ -5,7 +5,7 @@ import requests
 import io
 import pandas as pd
 from .Database import db
-
+from .DataRelated.Dataprepocessing import get_all_hyponyms
 
 views = Blueprint("views", __name__)
 
