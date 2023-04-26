@@ -13,7 +13,7 @@ def create_app():
     # Create a Flask app instance
     app = Flask(__name__)
     # Set the secret key for the app
-    app.config['SECRET_KEY'] = "perfetch"
+    app.config['SECRET_KEY'] = "perfetchworld"
     # Set the database URI for the app
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///database.db"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

@@ -3,11 +3,24 @@
 {% block content %}
 <h1 align="center">Start an Analysis</h1>
 <style>
-#file-data{
+.displaydata{
     white-space: pre-wrap; 
     word-wrap: break-word;
 }
-
+#process-data {
+    font-family: Arial, sans-serif;
+}
+#process-data th, #process-data td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+#process-data th {
+    background-color: #f2f2f2;
+}
+#process-data tbody tr:hover {
+    background-color: #f5f5f5;
+}
 </style>   
 
 <form method="POST" enctype="multipart/form-data">
@@ -19,9 +32,13 @@
     <br>
     <div align="left" style="margin-top:20px">
         <button type="submit" class="btn btn-lg btn-primary">submit</button>
-        <a href=#><button type="button" class="btn btn-lg ">Preprocess</button></a>
-        <a href=#><button type="button" class="btn btn-lg ">Sentiment</button></a>
+        <button type="button" id="preprocess" class="btn btn-lg btn-info">Preprocess</button>
+        <a href=#><button type="button" class="btn btn-lg btn-warning">Sentiment</button></a>
         <a href="\home"><button type="button" class="btn btn-lg btn-secondary">Back</button></a>
+        
+    </div>
+    <div align="right">
+        <button id="save" type="button" class="btn btn-lg btn-success">Save</button></a>
     </div>
     
 </form>
@@ -30,9 +47,25 @@
 <!-- Display area for data read from uploaded file -->
 <div align="center" style="width:fit-content">
     <label>Data from uploaded file:</label>
-    <pre id="file-data"></pre>
+    <pre id="file-data" class="displaydata"></pre>
 </div>
 
+<!-- Display area for data Preprocess -->
+<div align="center" style="width:fit-content">
+    <label>Data after preprocessing:</label>
+</div>
+
+<table id="process-data" style="border-collapse: collapse; width: 100%;">
+    <thead style="background-color: #f2f2f2;">
+        <tr>
+            <th >Domain</th>
+            <th >Entity</th>
+            <th >Sentence</th>
+            <!-- Add more columns as needed based on your DataFrame structure -->
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
 
 
 
@@ -65,7 +98,7 @@
         }
 
 
-
+ 
         
         document.querySelector('form').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -74,16 +107,11 @@
             var file = fileInput.files[0];
             var textarea = document.getElementById('text');
             var textareaValue = textarea.value;
-       
-            if (!file) {
-                alert('Error: Please select a file to upload.');
-                return;
-            }
-
             if (textareaValue=="") {
                 alert('Error: Please input Description to start.');
                 return;
             }
+          
 
             var formData = new FormData();
             formData.append('file', file);
@@ -115,8 +143,45 @@
             });
         });
 
-    
-}
+        document.querySelector('#preprocess').addEventListener('click', function() {
+            fetch('/preprocess', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+               
+                var tableBodyElement = document.querySelector('#process-data tbody');
+            tableBodyElement.innerHTML = ''; // Clear existing table body
+
+            // Iterate through each row in the data
+            data.forEach(function(row) {
+                // Create a new row (TR) element
+                var rowElement = document.createElement('tr');
+
+                // Iterate through each column in the row
+                for (var key in row) {
+                    // Create a new cell (TD) element
+                    var cellElement = document.createElement('td');
+                    cellElement.textContent = row[key];
+                    
+                    // Append the cell to the row
+                    rowElement.appendChild(cellElement);
+                }
+
+                // Append the row to the table body
+                tableBodyElement.appendChild(rowElement);
+                });
+
+                // Append the HTML list to the file-data element
+                fileDataElement.appendChild(listElement);})
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+
+    }
+
     
 </script>
 {% endblock %}

@@ -68,5 +68,5 @@ def getEntity(text):
         categories, keywords = aspectCat(tokens)
         print(sent, categories, keywords)
         data_dict = {"entity": keywords, "domain": categories, "sentence": sent}
-        df = df.append(data_dict, ignore_index=True)
+        df = pd.concat([df,pd.DataFrame([data_dict])], ignore_index=True)
     return  df

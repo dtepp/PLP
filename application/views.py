@@ -1,13 +1,14 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file,jsonify
+from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file,jsonify,session
 from flask_login import login_required, current_user
 from .models import Post, User, Comment, Like, Follower
 import requests
 import io
 import pandas as pd
 from .Database import db
-from .DataRelated.Dataprepocessing import get_all_hyponyms
+from .DataRelated.Dataprepocessing import getEntity
 
 views = Blueprint("views", __name__)
+
 
 
 @views.route("/")
@@ -36,10 +37,12 @@ def create_post():
         text = request.form.get('text')
         # Get uploaded file
         file = request.files.get('file')
-        print(text)
+       
         # Check if text is empty
         if  text =="":
             flash("Evaluation description cannot be empty", category="error")
+        elif  file.filename=="":
+            flash("Please select a file to upload.", category="error")
         else:
             # Read file content
             file_content = file.read()
@@ -47,7 +50,7 @@ def create_post():
            
             if file_extension in {'xls', 'xlsx'}:
                 # Read Excel data using pandas
-                df = pd.read_excel(io.BytesIO(file_content))
+                df = pd.read_excel(io.BytesIO(file_content),header=0)
 
             elif file_extension == 'csv':
                 # Read CSV data using pandas
@@ -57,14 +60,14 @@ def create_post():
                 # Iterate through each encoding format and try reading the CSV file
                 for encoding in encoding_formats:
                     try:
-                        df = pd.read_csv(io.BytesIO(file_content), encoding=encoding)
+                        df = pd.read_csv(io.BytesIO(file_content), encoding=encoding, header=0)
                         break
                     except UnicodeDecodeError:
                         continue
             # Convert DataFrame to dictionary
             
             data = df.values.tolist()
-            
+            session['data'] = data
             return jsonify(data)
             # # Create new post object with text and current user's ID
             # post = Post(text=text, author=current_user.id)
@@ -200,7 +203,23 @@ def like(post_id):
 
 
 
+@views.route("/preprocess", methods=['POST'])
+def preprocess():
+    # Process the uploaded file data and return the processed data
+    # You can update this logic based on your specific preprocessing requirements
 
+    # Example: Process the data by converting all text to uppercase
+    data = session.get('data')
+    result=pd.DataFrame()
+    for item in data:
+
+        text=" ".join(item)
+        processtext= getEntity(text)
+        result=pd.concat([result,processtext],ignore_index=True)
+
+    print(result)
+    # Return the processed data as JSON response
+    return jsonify(result.to_dict(orient='records'))
 
 
 
