@@ -5,12 +5,11 @@ from flask import Flask, request, jsonify
 from keras.models import load_model
 import pickle
 
-
 maxlen = 689  # 限制文本长度
 
 def load_trained_model(model_path):
     model = load_model(model_path)
-    return model
+    return modelpip
 
 def load_tokenizer(tokenizer_path):
     with open(tokenizer_path, 'rb') as handle:
