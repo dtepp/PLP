@@ -6,6 +6,7 @@ import io
 import pandas as pd
 from .Database import db
 from .DataRelated.Dataprepocessing import getEntity
+from .CNNModel.model import predict_review
 
 views = Blueprint("views", __name__)
 
