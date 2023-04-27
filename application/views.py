@@ -6,11 +6,11 @@ import io
 import pandas as pd
 from .Database import db
 from .DataRelated.Dataprepocessing import getEntity
-from .CNNModel.model import predict_review
+from .CNNModel.model import predict_review,load_trained_model
 
 views = Blueprint("views", __name__)
 
-
+load_trained_model("./application/CNNModel/model.h5")
 
 @views.route("/")
 @views.route("/home")
