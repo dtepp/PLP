@@ -17,7 +17,7 @@ def get_all_hyponyms(synset, hyponyms_list):
 
 
 extra_food_words = ["noodle"]
-extra_env_words = ["floor","toilet","facility"]
+extra_env_words = ["floor","toilet","facility","far","near","room","location"]
 food_synset = wn.synset('food.n.01')
 hyponyms_list = []
 get_all_hyponyms(food_synset, hyponyms_list)
@@ -58,15 +58,23 @@ def aspectCat(sentence):
 
 
 
+
+
+
+
+
+
 def getEntity(text):
     text = text.replace(",", ".")
     sentences = nltk.sent_tokenize(text)
     df = pd.DataFrame(columns=["entity", "domain", "sentence"])
     for sent in sentences:
-
         tokens = nltk.word_tokenize(sent)
         categories, keywords = aspectCat(tokens)
-        print(sent, categories, keywords)
-        data_dict = {"entity": keywords, "domain": categories, "sentence": sent}
-        df = pd.concat([df,pd.DataFrame([data_dict])], ignore_index=True)
+        #print(sent, categories, keywords)
+
+        if "overall" not in categories:
+            #print(11)
+            data_dict = {"entity": keywords, "domain": categories, "sentence": sent}
+            df = pd.concat([df,pd.DataFrame([data_dict])], ignore_index=True)
     return  df
