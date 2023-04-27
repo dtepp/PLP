@@ -16,14 +16,19 @@ def load_tokenizer(tokenizer_path):
         tokenizer = pickle.load(handle)
     return tokenizer
 
-def predict_review(text, model, tokenizer):
+model=load_trained_model("./application/CNNModel/model.h5")
+tokenizer=load_tokenizer("./application/CNNModel/tokenizer.pickle")
+
+def predict_review(text):
     tokenizer.fit_on_texts(text)
     text_sequence = tokenizer.texts_to_sequences([text])
     X_input = pad_sequences(text_sequence, padding='post', maxlen=689)
     prediction = model.predict(X_input)
     label = 1 if prediction[0][1] > 0.5 else 0
     if label == 1:
-        print("The text is classified as: Negative")
+        #print("The text is classified as: Negative")
+        return 0
     else:
-        print("The text is classified as: Positive")
+        #print("The text is classified as: Positive")
+        return 1
 
