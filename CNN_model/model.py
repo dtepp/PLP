@@ -9,7 +9,7 @@ maxlen = 689  # 限制文本长度
 
 def load_trained_model(model_path):
     model = load_model(model_path)
-    return modelpip
+    return model
 
 def load_tokenizer(tokenizer_path):
     with open(tokenizer_path, 'rb') as handle:
