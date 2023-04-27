@@ -34,3 +34,6 @@ jsonpickle==3.0.1
 keras==2.12.0
 keras-vis==0.4.1
 pickleshare==0.7.5
+tensorflow==2.8.0
+tensorflow-addons==0.13.0
+tensorflow-io-gcs-filesystem==0.24.0
