@@ -256,15 +256,14 @@ def sentiment():
     data=session.get('data')
     overallNum=len(data)
     for text in data:
-        if len(text)<=50:
+        
             result=predict_review(text)
             
             if result:
                 overallPos=overallPos+1
             else:
                 continue 
-        else:
-            continue
+  
 
     for dict in preprocessed:
         result=predict_review(dict["sentence"])
