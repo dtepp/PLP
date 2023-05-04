@@ -33,8 +33,8 @@
     <div align="left" style="margin-top:20px">
         <button type="submit" class="btn btn-lg btn-primary">submit</button>
         <button type="button" id="preprocess" class="btn btn-lg btn-info">Preprocess</button>
-        <a href=#><button type="button" class="btn btn-lg btn-warning">Sentiment</button></a>
-        <a href="\home"><button type="button" class="btn btn-lg btn-secondary">Back</button></a>
+        <button type="button" id="sentiment" class="btn btn-lg btn-warning">Sentiment</button>
+        <a href="\home"><button id="back" type="button" class="btn btn-lg btn-secondary">Back</button></a>
         
     </div>
     <div align="right">
@@ -67,6 +67,10 @@
     <tbody></tbody>
 </table>
 
+<div align="center" style="width:fit-content">
+    <label>Sentiment Analysis result:</label>
+    <pre id="sentiment-data" class="displaydata"></pre>
+</div>
 
 
 <!-- JavaScript to send form data to backend and display data from backend response -->
@@ -74,6 +78,7 @@
     function validateFile() {
         var fileInput = document.getElementById('file');
         var file = fileInput.files[0];
+        
 
         // Validate file size
         var fileSize = file.size;
@@ -143,13 +148,14 @@
             });
         });
 
+        var preprocessData;
         document.querySelector('#preprocess').addEventListener('click', function() {
             fetch('/preprocess', {
                 method: 'POST'
             })
             .then(response => response.json())
             .then(data => {
-               
+                preprocessData=data
                 var tableBodyElement = document.querySelector('#process-data tbody');
             tableBodyElement.innerHTML = ''; // Clear existing table body
 
@@ -173,12 +179,64 @@
                 });
 
                 // Append the HTML list to the file-data element
-                fileDataElement.appendChild(listElement);})
+                })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+  
+        var resulttext;
+        var textarea = document.getElementById('text');
+        var textareaValue = textarea.value;
+        resulttext="["+textareaValue+"]  ";
+
+        document.querySelector('#sentiment').addEventListener('click', function() {
+
+            var formData = new FormData();
+            formData.append('preprocess',  JSON.stringify(preprocessData));
+            fetch('/sentiment', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                var SentiElement = document.getElementById('sentiment-data');
+
+                // Convert the list of values to an HTML list
+                var listElement = document.createElement('ul');
+                data.forEach(function(item) {
+                    var listItemElement = document.createElement('li');
+                    listItemElement.textContent = item;
+                    resulttext=resulttext+item;
+                    listElement.appendChild(listItemElement);
+                });
+
+                // Append the HTML list to the file-data element
+                SentiElement.appendChild(listElement);
+            })
             .catch(error => {
                 console.error('Error:', error);
             });
         });
 
+        document.querySelector('#save').addEventListener('click', function() {
+
+            var formData = new FormData();
+            formData.append('text',  JSON.stringify(resulttext));
+            fetch('/savepost', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response)
+            .then(data => {
+                
+                document.getElementById("back").click();
+            })
+            .catch(error => {
+                document.getElementById("back").click();
+                console.error('Error:', error);
+            });
+        });
 
     }
 

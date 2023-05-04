@@ -6,7 +6,8 @@ import io
 import pandas as pd
 from .Database import db
 from .DataRelated.Dataprepocessing import getEntity
-
+from .CNNModel.model import predict_review
+import json
 views = Blueprint("views", __name__)
 
 
@@ -26,6 +27,26 @@ def home():
     # Combine the two lists of posts
     posts = following_posts + user_posts
     return render_template("home.html", user=current_user, posts=posts)
+
+
+@login_required
+@views.route("/savepost", methods=['POST'])
+def save_post():
+    if request.method == "POST":
+        # Get text from request form
+        text = request.form.get('text')
+    
+            # Create new post object with text and current user's ID
+        post = Post(text=text, author=current_user.id)
+            # Add post to database session
+        db.session.add(post)
+            # Commit changes to the database
+        db.session.commit()
+            # Flash success message
+        flash("Evaluation created!", category='success')
+            # Redirect to home page
+        return redirect(url_for('views.home'))
+
 
 
 @login_required
@@ -69,19 +90,10 @@ def create_post():
             data = df.values.tolist()
             session['data'] = data
             return jsonify(data)
-            # # Create new post object with text and current user's ID
-            # post = Post(text=text, author=current_user.id)
-            # # Add post to database session
-            # db.session.add(post)
-            # # Commit changes to the database
-            # db.session.commit()
-            # # Flash success message
-            # flash("Evaluation created!", category='success')
-            # # Redirect to home page
-            # return redirect(url_for('views.home'))
 
     # Render the create_post template
     return render_template("create_post.html", user=current_user, User=User)
+
 
 
 @views.route("/delete-post/<id>")
@@ -217,9 +229,78 @@ def preprocess():
         processtext= getEntity(text)
         result=pd.concat([result,processtext],ignore_index=True)
 
-    print(result)
     # Return the processed data as JSON response
     return jsonify(result.to_dict(orient='records'))
 
 
+@views.route("/sentiment", methods=['POST'])
+def sentiment():
+    # Process the uploaded file data and return the processed data
+    # You can update this logic based on your specific preprocessing requirements
+    preprocessed = json.loads(request.form.get("preprocess"))
+    # Example: Process the data by converting all text to uppercase
+  
+    
+   
+    overallNum=0
+    overallPos=0
+    FoodNum=0
+    FoodPos=0
+    PriceNum=0
+    PricePos=0
+    environmentNum=0
+    environmentPos=0
+    serviceNum=0
+    servicePos=0
+    
+    data=session.get('data')
+    overallNum=len(data)
+    for text in data:
+        
+            result=predict_review(text)
+            
+            if result:
+                overallPos=overallPos+1
+            else:
+                continue 
+  
+
+    for dict in preprocessed:
+        result=predict_review(dict["sentence"])
+        for domain in  dict["domain"]:
+            if "food" in domain:
+                FoodNum=FoodNum+1
+                if result:
+                        FoodPos=FoodPos+1
+                else:
+                        continue 
+            elif "price" in domain:
+                PriceNum=PriceNum+1
+                if result:
+                        PricePos=PricePos+1
+                else:
+                        continue 
+            elif "environment" in domain:
+                environmentNum=environmentNum+1
+                if result:
+                        environmentPos=environmentPos+1
+                else:
+                        continue 
+            elif "service" in domain:
+                serviceNum=serviceNum+1
+                if result:
+                        servicePos=servicePos+1
+                else:
+                        continue 
+            else:
+                continue
+        
+    Summary="There are "+str(overallNum)+" customer reviews, "+str(overallPos)+" of them is positive."
+    Food="There are "+str(FoodNum)+" comment on food, "+str(FoodPos)+" of them is positive."
+    Price="There are "+str(PriceNum)+" comment on price, "+str(PricePos)+" of them is positive."
+    environment="There are "+str(environmentNum)+" comment on environment, "+str(environmentPos)+" of them is positive."
+    service="There are "+str(serviceNum)+" comment on service, "+str(servicePos)+" of them is positive."
+    # Return the processed data as JSON response
+    resultlist=[Summary,Food,Price,environment,service]
+    return jsonify(resultlist)
 
