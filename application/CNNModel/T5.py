@@ -1,17 +1,27 @@
 # 加载模型
 import torch
-from transformers import T5ForConditionalGeneration
+from transformers import T5ForConditionalGeneration, T5Tokenizer
+from googletrans import Translator
+
+# translator = Translator(service_urls=['translate.google.com', ])
+#
+# detection = translator.detect('你好')
+# print(detection.lang)
+#
+# trans = translator.translate('你好', dest='en')
+# # translated text
+# print(trans.text)
 
 model = T5ForConditionalGeneration.from_pretrained('t5-base')
-model.load_state_dict(torch.load('T5model.pt'))
-
-# 设置设备
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-model = model.to(device)
-
-# 准备输入
-input_text = "这是一个输入示例"
-input_ids = tokenizer.encode(input_text, return_tensors='pt').to(device)
+model.load_state_dict(torch.load('T5model.pt',map_location='cpu'))
+tokenizer = T5Tokenizer.from_pretrained("t5-base",model_max_length=1024)
+# # 设置设备
+#
+# model = torch.load(")
+# model = model.to(device)
+# prepare the text
+input_text = "hello"
+input_ids = tokenizer.encode(input_text, return_tensors='pt')
 
 # 生成摘要
 outputs = model.generate(input_ids=input_ids,
