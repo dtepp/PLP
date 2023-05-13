@@ -6,8 +6,9 @@ import io
 import pandas as pd
 from .Database import db
 from .DataRelated.Dataprepocessing import getEntity
-from .CNNModel.model import predict_review
+from .CNNModel.OverallSentiment import predict_review
 import json
+
 views = Blueprint("views", __name__)
 
 

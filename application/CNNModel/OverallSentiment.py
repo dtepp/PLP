@@ -4,10 +4,10 @@ from transformers import BertTokenizer
 from keras.utils import pad_sequences
 from keras.models import load_model
 
-model_dp = load_model('./model2.h5')
+
 
 def predict_review(test_text):
-
+    model_dp = load_model('./application/CNNModel/OverallS.h5')
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
     text_sequence = tokenizer.encode(test_text, add_special_tokens=True)
     X_input = pad_sequences([text_sequence], padding='post', maxlen=715)
