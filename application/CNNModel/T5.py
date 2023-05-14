@@ -1,7 +1,7 @@
 # 加载模型
 import torch
 from transformers import T5ForConditionalGeneration, T5Tokenizer
-from googletrans import Translator
+#from googletrans import Translator
 
 # translator = Translator(service_urls=['translate.google.com', ])
 #
@@ -20,7 +20,7 @@ tokenizer = T5Tokenizer.from_pretrained("t5-base",model_max_length=1024)
 # model = torch.load(")
 # model = model.to(device)
 # prepare the text
-input_text = "hello"
+input_text = "你好"
 input_ids = tokenizer.encode(input_text, return_tensors='pt')
 
 # 生成摘要
