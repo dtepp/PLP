@@ -1,38 +1,60 @@
-# 加载模型
 import torch
-from transformers import T5ForConditionalGeneration, T5Tokenizer
-#from googletrans import Translator
+from transformers import AutoTokenizer, MT5ForConditionalGeneration
+from googletrans import Translator
 
-# translator = Translator(service_urls=['translate.google.com', ])
-#
-# detection = translator.detect('你好')
-# print(detection.lang)
-#
-# trans = translator.translate('你好', dest='en')
-# # translated text
-# print(trans.text)
 
-model = T5ForConditionalGeneration.from_pretrained('t5-base')
-model.load_state_dict(torch.load('T5model.pt',map_location='cpu'))
-tokenizer = T5Tokenizer.from_pretrained("t5-base",model_max_length=1024)
-# # 设置设备
-#
-# model = torch.load(")
-# model = model.to(device)
-# prepare the text
-input_text = "你好"
-input_ids = tokenizer.encode(input_text, return_tensors='pt')
+def translation(input_texts):
+    def encode_str(text, tokenizer, seq_len):
+        """ Tokenize, pad to max length and encode to ids
+          Returns tensor with token ids """
+        input_ids = tokenizer.encode(
+            text=text,
+            return_tensors='pt',
+            padding='max_length',
+            truncation=True,
+            max_length=seq_len)
 
-# 生成摘要
-outputs = model.generate(input_ids=input_ids,
-                          max_length=150,
-                          num_beams=2,
-                          repetition_penalty=2.5,
-                          length_penalty=1.0,
-                          early_stopping=True)
+        return input_ids[0]
 
-# 解码输出
-output_text = tokenizer.decode(outputs[0], skip_special_tokens=True, clean_up_tokenization_spaces=True)
+    max_inp_seq_len = 40
+    max_tar_seq_len = 3
 
-# 打印输出
-print(output_text)
+    tokenizer = AutoTokenizer.from_pretrained('google/mt5-small')
+    LANG_TOKEN_MAPPING = {
+        'identify language': '<idf.lang>'
+    }
+    special_tokens_dict = {'additional_special_tokens': list(LANG_TOKEN_MAPPING.values())}
+
+    # Adding the special tokens to the tokenizer
+    tokenizer.add_special_tokens(special_tokens_dict)
+
+    model = MT5ForConditionalGeneration.from_pretrained('google/mt5-small')
+    model.resize_token_embeddings(len(tokenizer))
+    model_t5 = 'Step-5623_checkpoint_lang_pred.pt'
+    model.load_state_dict(torch.load(model_t5, map_location=torch.device('cpu')))
+
+    for input_text in input_texts:
+        input_ids = encode_str(input_text, tokenizer, max_inp_seq_len)
+
+        # Generate output
+        output_ids = model.generate(input_ids=input_ids.unsqueeze(0),
+                                    max_length=max_tar_seq_len,
+                                    num_beams=10,
+                                    num_return_sequences=1,
+                                    length_penalty=1,
+                                    no_repeat_ngram_size=2)
+
+        # Decode output
+        output_text = tokenizer.decode(output_ids.squeeze(), skip_special_tokens=True)
+
+        if output_text != 'en':
+            translator = Translator(service_urls=['translate.google.com'])
+            trans = translator.translate(input_text, dest='en')
+            # Translated text
+            print(trans.text)
+        else:
+            print(input_text)
+
+# Example usage with a list of input texts
+# input_texts = ["你好我是Dai Chujian", "I am Leo Messi", "我是中国人", "このホテルはとても良いと思います"]
+# translation(input_texts)
