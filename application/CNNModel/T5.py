@@ -56,5 +56,5 @@ def translation(input_texts):
             print(input_text)
 
 # Example usage with a list of input texts
-# input_texts = ["你好我是Dai Chujian", "I am Leo Messi", "我是中国人", "このホテルはとても良いと思います"]
-# translation(input_texts)
+input_texts = ["你好我是Dai Chujian", "I am Leo Messi", "我是中国人", "このホテルはとても良いと思います"]
+translation(input_texts)

@@ -33,6 +33,8 @@ for nlp project
 
 2. Place the file in the same directory as app.py
 
+3. If you face below error:image.png
+    please run set PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python in your terminal for current venv environment
 
 ### [ 4 ] Run the systems on browser
 Go to URL using web browser**http://127.0.0.1:5000

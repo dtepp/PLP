@@ -19,12 +19,12 @@ def predict_review(test_text):
         print("The text is classified as: Positive")
 
 
-test_data = ["This hotel was amazing! The staff was friendly and the room was clean and comfortable.",
-             "I had a terrible experience at this hotel. The room was dirty and the staff was unhelpful.",
-             "I had a wonderful stay at this hotel because of its clean and comfortable room! The staff was friendly . I would definitely recommend it to others.",
-             "To be honst, the only advantage of this hotel is its price ! When i waked up in the morning and went down, the breakfast were cold already ! Its location is bad too which took me one hour to the city bank",
-             "The food at the restaurant was delicious and the service was excellent.",
-             "The location of the hotel was perfect for my needs and the room was spacious and well-appointed."]
+# test_data = ["This hotel was amazing! The staff was friendly and the room was clean and comfortable.",
+#              "I had a terrible experience at this hotel. The room was dirty and the staff was unhelpful.",
+#              "I had a wonderful stay at this hotel because of its clean and comfortable room! The staff was friendly . I would definitely recommend it to others.",
+#              "To be honst, the only advantage of this hotel is its price ! When i waked up in the morning and went down, the breakfast were cold already ! Its location is bad too which took me one hour to the city bank",
+#              "The food at the restaurant was delicious and the service was excellent.",
+#              "The location of the hotel was perfect for my needs and the room was spacious and well-appointed."]
 
-for text in test_data:
-    predict_review(text)
+# for text in test_data:
+#     predict_review(text)
