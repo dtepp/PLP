@@ -33,6 +33,7 @@ def translation(input_texts):
     model_t5 = 'Step-5623_checkpoint_lang_pred.pt'
     model.load_state_dict(torch.load(model_t5, map_location=torch.device('cpu')))
 
+    i = 0
     for input_text in input_texts:
         input_ids = encode_str(input_text, tokenizer, max_inp_seq_len)
 
@@ -48,6 +49,7 @@ def translation(input_texts):
         output_text = tokenizer.decode(output_ids.squeeze(), skip_special_tokens=True)
 
         if output_text != 'en':
+            i = i + 1
             translator = Translator(service_urls=['translate.google.com'])
             trans = translator.translate(input_text, dest='en')
             # Translated text
@@ -55,6 +57,9 @@ def translation(input_texts):
         else:
             print(input_text)
 
+    print("There are overall {} sentences that are not in English".format(i))
+
+
 # Example usage with a list of input texts
-input_texts = ["你好我是Dai Chujian", "I am Leo Messi", "我是中国人", "このホテルはとても良いと思います"]
-translation(input_texts)
+# input_texts = ["你好我是Dai Chujian", "I am Chinese", "我是中国人", "このホテルはとても良いと思います"]
+# translation(input_texts)
