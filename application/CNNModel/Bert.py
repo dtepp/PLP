@@ -12,7 +12,7 @@ def predict_and_result(test_file):
 
         # Load the model
         model = BertForSequenceClassification.from_pretrained('bert-base-uncased')
-        model.load_state_dict(torch.load('checkpoints/pytorch_model.bin'))
+        model.load_state_dict(torch.load('pytorch_model.bin'))
 
         model.to(device)
 
