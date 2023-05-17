@@ -40,7 +40,15 @@ for nlp project
     
     in your terminal for current venv environment
 
-### [ 4 ] Run the systems on browser
+### [ 4 ] Configuration of Bert Model
+
+1. First, please download the Bert model checkpoints file called 
+   *pytorch_model.bin* from Google Drive:
+    https://drive.google.com/file/d/1-cYurHnp3mIJyCYuNhDHfXXhfwzsmp0V/view?usp=sharing
+
+2. Place the file in the same directory as app.py
+
+### [ 5 ] Run the systems on browser
 Go to URL using web browser**http://127.0.0.1:5000
 Or: Directly click the link on the frontend terminal
 
