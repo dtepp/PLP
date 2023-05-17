@@ -23,7 +23,7 @@ def predict_and_result(test_file):
 
         # Tokenize the text
         inputs = tokenizer.encode_plus(
-            test_text,
+            test_sentences,
             add_special_tokens=True,
             max_length=64,
             padding='max_length',
@@ -70,28 +70,28 @@ def predict_and_result(test_file):
     for i in range(len(df)):
         sent.append(predict_subreview(df['sentence'][i]))
     df = df.assign(subsent=sent)
-    # 根据 domain 列分组
+    # group by domain
     grouped_domain = df.groupby('domain')
 
-    # 遍历每个 domain 分组
+    # look at each domain
     for domain, group_domain in grouped_domain:
         print(f"Domain: {domain}")
 
-        # 统计每个情感类别的数量
+        # summarize the sentiment counts
         sentiment_counts_domain = group_domain['subsent'].value_counts()
         print("Sentiment counts for the domain:")
         print(sentiment_counts_domain)
 
         print()
 
-        # 根据 entity 列分组
+        # group by entity
         grouped_entity = group_domain.groupby('entity')
 
-        # 遍历每个 entity 分组
+        # look at each entity in this domain
         for entity, group_entity in grouped_entity:
             print(f"Entity: {entity}")
 
-            # 统计每个情感类别的数量
+            # summarize the sentiment counts
             sentiment_counts_entity = group_entity['subsent'].value_counts()
             print("Sentiment counts for the entity:")
             print(sentiment_counts_entity)
