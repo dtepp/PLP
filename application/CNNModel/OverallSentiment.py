@@ -1,5 +1,5 @@
 # pip install transformers
-import torch
+import pandas as pd
 from transformers import BertTokenizer
 from keras.utils import pad_sequences
 from keras.models import load_model
@@ -28,3 +28,4 @@ def predict_review(test_text):
 
 # for text in test_data:
 #     predict_review(text)
+
