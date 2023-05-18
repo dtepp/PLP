@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 def load_bert_model(device):
     model = BertForSequenceClassification.from_pretrained('bert-base-uncased')
-    model.load_state_dict(torch.load('checkpoints/pytorch_model.bin'))
+    model.load_state_dict(torch.load('pytorch_model.bin'))
     model.to(device)
     return model
 
@@ -112,5 +112,5 @@ def predict_and_result(test_file):
             print()
 
 
-# test_file = 'Reviews.xlsx'
-# predict_and_result(test_file)
+test_file = 'Reviews.xlsx'
+predict_and_result(test_file)
