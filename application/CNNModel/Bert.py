@@ -98,6 +98,7 @@ def predict_and_result(test_file):
 
             print()
 
-
+'''
 test_file = 'Reviews.xlsx'
 predict_and_result(test_file)
+'''
