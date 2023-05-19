@@ -2,6 +2,7 @@ import pandas as pd
 import nltk
 from nltk.tokenize import WordPunctTokenizer
 import numpy as np
+from application.Dataprepocessing import getEntity
 from nnsplit import NNSplit
 from textblob import TextBlob
 
