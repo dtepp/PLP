@@ -31,6 +31,13 @@ def home():
     posts = following_posts + user_posts
     return render_template("home.html", user=current_user, posts=posts)
 
+@views.route("/new")
+@login_required
+def new():
+  
+
+    return render_template("new.html", user=current_user)
+
 
 @login_required
 @views.route("/savepost", methods=['POST'])

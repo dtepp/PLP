@@ -1,6 +1,6 @@
-{% extends "nav.html" %} {% block title %}Hotel comments analysis{% endblock %} {% block content
+{% extends "nav.html" %} {% block title %}{% endblock %} {% block content
 %}
-<h1 align="center">{% block header %}Hotel comments analysis{% endblock %}</h1>
+<h3 align="center">{% block header %}History{% endblock %}</h3>
 <div id="posts">
   {% for post in posts %}
   <div class="card border-dark">
@@ -66,10 +66,12 @@
   <br />{% endfor %}
 </div>
 {% block footer %}
+{% if posts|length == 0 %}
 <div align="center">
   <br />
-  <a href="/create-post"><button type="button" class="btn btn-primary btn-lg">
-      Create a new evaluation 
+  <a href="/new"><button type="button" class="btn btn-primary btn-lg">
+    Generate the first analysis record
     </button></a>
 </div>
+{% endif %}
 {% endblock %} {% endblock %}
