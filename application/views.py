@@ -5,11 +5,10 @@ import requests
 import io
 import pandas as pd
 from .Database import db
-from .Dataprepocessing import getEntity
-#from .CNNModel.OverallSentiment import predict_review
+
+
 import json
-from .CNNModel.T5 import translation
-from .CNNModel.Bert import predict_and_result
+
 
 views = Blueprint("views", __name__)
 

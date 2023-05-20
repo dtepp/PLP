@@ -70,7 +70,7 @@ def predict_and_result(test_file):
         print('No GPU available, using the CPU instead.')
         device = torch.device("cpu")
 
-    df = pd.read_excel(test_file)
+    df = test_file
 
     if device == torch.device("cpu"):
         cnn_model = load_cnn_model()
@@ -84,33 +84,32 @@ def predict_and_result(test_file):
     df = df.assign(subsent=sent)
 
     # group by domain
-    grouped_domain = df.groupby('domain')
-
+    grouped_domains = df.groupby('domain')
+    entitylist=[]
+    domainlist=[]
     # look at each domain
-    for domain, group_domain in grouped_domain:
-        print(f"Domain: {domain}")
-
+    for domain, group_domain in grouped_domains:
+        domainname=(domain+", ")
+       # print(domain)
+        #print(group_domain)
         # summarize the sentiment counts
         sentiment_counts_domain = group_domain['subsent'].value_counts()
-        print("Sentiment counts for the domain:")
-        print(sentiment_counts_domain)
-
-        print()
-
+        domainresult="Sentiment counts for the domain: "+sentiment_counts_domain.to_string(index=True)
+        domainlist.append((domainname+ domainresult).replace('\n', '; '))
         # group by entity
         grouped_entity = group_domain.groupby('entity')
-
         # look at each entity in this domain
         for entity, group_entity in grouped_entity:
-            print(f"Entity: {entity}")
-
+            Entityname=entity
+            
             # summarize the sentiment counts
             sentiment_counts_entity = group_entity['subsent'].value_counts()
-            print("Sentiment counts for the entity:")
-            print(sentiment_counts_entity)
+           
+            sentiment_counts = sentiment_counts_entity.to_string(index=True).replace('\n', '; ')
 
-            print()
-
+            entitylist.append(Entityname+", "+domain+", " +sentiment_counts)
+         
+    return entitylist,domainlist
 
 # test_file = 'Reviews.xlsx'
 # predict_and_result(test_file)

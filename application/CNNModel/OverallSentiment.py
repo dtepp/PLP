@@ -5,17 +5,28 @@ from keras.models import load_model
 
 
 
-def predict_review(test_text):
-    model_dp = load_model('./application/CNNModel/OverallS.h5')
+
+def predict_review(test_texts):
+    model_dp = load_model('OverallS.h5')
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
-    text_sequence = tokenizer.encode(test_text, add_special_tokens=True)
-    X_input = pad_sequences([text_sequence], padding='post', maxlen=715)
-    prediction = model_dp(X_input)
-    label = 1 if prediction[0][1] > 0.5 else 0
-    if label == 1:
-        print("The text is classified as: Negative")
-    else:
-        print("The text is classified as: Positive")
+    NegNumber=0
+  
+    for test_text in test_texts:
+        text_sequence = tokenizer.encode(test_text, add_special_tokens=True)
+        X_input = pad_sequences([text_sequence], padding='post', maxlen=715)
+        prediction = model_dp(X_input)
+        label = 1 if prediction[0][1] > 0.5 else 0
+        
+        if label == 1:
+            NegNumber=NegNumber+1
+      
+            #print("The text is classified as: Negative")
+        else:
+            continue
+            #print("The text is classified as: Positive")
+    return NegNumber
+
+
 
 # test_data = ["This hotel was amazing! The staff was friendly and the room was clean and comfortable.",
 #              "I had a terrible experience at this hotel. The room was dirty and the staff was unhelpful.",
