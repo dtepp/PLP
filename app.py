@@ -5,7 +5,7 @@ from os import path
 from flask_login import LoginManager
 from application.views import views
 from application.authentication import authentication
-from application.models import User,Post,Comment,Like,Follower
+from application.models import User,Post,Comment,Like
 from application.Database import db,create_database
 
 # Create a SQLAlchemy object for database management

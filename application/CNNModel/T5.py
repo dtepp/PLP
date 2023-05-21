@@ -58,7 +58,7 @@ def translation(input_texts):
         else:
             final.append(input_text)
  
-    result_text = "There are overall {} sentences in the file, {} of them are not in English.".format(count, i)
+    result_text = "There are overall {} reviews in the file, {} of them are not in English.".format(count, i)
     return final,result_text,count
 
 # Example usage with a list of input texts

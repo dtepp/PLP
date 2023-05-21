@@ -1,11 +1,11 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, send_file,jsonify,session
 from flask_login import login_required, current_user
-from .models import Post, User, Comment, Like, Follower
+from .models import Post, User, Comment, Like
 import requests
 import io
 import pandas as pd
 from .Database import db
-
+from .SentimentAnalysis import ReviewAnalysis
 
 import json
 
@@ -18,23 +18,18 @@ views = Blueprint("views", __name__)
 @views.route("/home")
 @login_required
 def home():
-    # Get the IDs of users that the current user is following
-    following_ids = []
-    for follower in current_user.following:
-        following_ids.append(follower.user_id)
-    # Get the posts created by users that the current user is following
-    following_posts = Post.query.filter(Post.author.in_(following_ids)).all()
+
+  
+
     # Get the current user's posts
     user_posts = current_user.posts
     # Combine the two lists of posts
-    posts = following_posts + user_posts
+    posts = user_posts
     return render_template("home.html", user=current_user, posts=posts)
 
 @views.route("/new")
 @login_required
 def new():
-  
-
     return render_template("new.html", user=current_user)
 
 
@@ -94,11 +89,18 @@ def create_post():
                         break
                     except UnicodeDecodeError:
                         continue
-            # Convert DataFrame to dictionary
-            
+
             data = df.values.tolist()
-            session['data'] = data
-            return jsonify(data)
+            inputtext=df.iloc[:, 0].values.tolist()
+            (TranslateResult,OverallResult,Newdomainsentiment,df_sorted)=ReviewAnalysis(inputtext)
+           
+            df_sorted_json = df_sorted.to_dict(orient='records')
+            return jsonify({
+                            'TranslateResult': TranslateResult,
+                            'OverallResult': OverallResult,
+                            'Newdomainsentiment': Newdomainsentiment,
+                            'df_sorted': df_sorted_json
+                        })
 
     # Render the create_post template
     return render_template("create_post.html", user=current_user, User=User)
@@ -139,12 +141,9 @@ def post(username):
 
     user_id = user.id
 
-    # Check if the current user is following the user
-    following = Follower.query.filter_by(
-        user_id=user.id, follower_id=current_user.id).first()
-
+   
     # Render the posts template and pass the current user, posts, username, User, following, and user_id
-    return render_template("posts.html", user=current_user, posts=posts, username=username, User=User, following=following, user_id=user_id)
+    return render_template("posts.html", user=current_user, posts=posts, username=username, User=User, following=0, user_id=user_id)
 
 
 @views.route("/create-comment/<post_id>", methods=["POST"])
@@ -222,94 +221,4 @@ def like(post_id):
     # Redirect to the home page
     return redirect(url_for('views.home'))
 
-
-
-@views.route("/preprocess", methods=['POST'])
-def preprocess():
-    # Process the uploaded file data and return the processed data
-    # You can update this logic based on your specific preprocessing requirements
-
-    # Example: Process the data by converting all text to uppercase
-    data = session.get('data')
-    result=pd.DataFrame()
-    for item in data:
-
-        text=" ".join(item)
-        processtext= getEntity(text)
-        result=pd.concat([result,processtext],ignore_index=True)
-
-    # Return the processed data as JSON response
-    return jsonify(result.to_dict(orient='records'))
-
-
-@views.route("/sentiment", methods=['POST'])
-def sentiment():
-    # Process the uploaded file data and return the processed data
-    # You can update this logic based on your specific preprocessing requirements
-    preprocessed = json.loads(request.form.get("preprocess"))
-    # Example: Process the data by converting all text to uppercase
-  
-    
-   
-    overallNum=0
-    overallPos=0
-    FoodNum=0
-    FoodPos=0
-    PriceNum=0
-    PricePos=0
-    environmentNum=0
-    environmentPos=0
-    serviceNum=0
-    servicePos=0
-    
-    data=session.get('data')
-    overallNum=len(data)
-    for text in data:
-        
-            result=predict_review(text)
-            
-            if result:
-                overallPos=overallPos+1
-            else:
-                continue 
-  
-
-    for dict in preprocessed:
-        result=predict_review(dict["sentence"])
-        for domain in  dict["domain"]:
-            if "food" in domain:
-                FoodNum=FoodNum+1
-                if result:
-                        FoodPos=FoodPos+1
-                else:
-                        continue 
-            elif "price" in domain:
-                PriceNum=PriceNum+1
-                if result:
-                        PricePos=PricePos+1
-                else:
-                        continue 
-            elif "environment" in domain:
-                environmentNum=environmentNum+1
-                if result:
-                        environmentPos=environmentPos+1
-                else:
-                        continue 
-            elif "service" in domain:
-                serviceNum=serviceNum+1
-                if result:
-                        servicePos=servicePos+1
-                else:
-                        continue 
-            else:
-                continue
-        
-    Summary="There are "+str(overallNum)+" customer reviews, "+str(overallPos)+" of them is positive."
-    Food="There are "+str(FoodNum)+" comment on food, "+str(FoodPos)+" of them is positive."
-    Price="There are "+str(PriceNum)+" comment on price, "+str(PricePos)+" of them is positive."
-    environment="There are "+str(environmentNum)+" comment on environment, "+str(environmentPos)+" of them is positive."
-    service="There are "+str(serviceNum)+" comment on service, "+str(servicePos)+" of them is positive."
-    # Return the processed data as JSON response
-    resultlist=[Summary,Food,Price,environment,service]
-    return jsonify(resultlist)
 

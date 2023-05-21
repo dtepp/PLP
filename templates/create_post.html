@@ -3,6 +3,18 @@
 {% block content %}
 <h3 align="center">Start an Analysis</h3>
 <style>
+.loading-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+}
+
 .displaydata{
     white-space: pre-wrap; 
     word-wrap: break-word;
@@ -31,46 +43,47 @@
     <input type="file" name="file" id="file" class="form-control-file" onchange="validateFile()">
     <br>
     <div align="left" style="margin-top:20px">
-        <button type="submit" class="btn btn-lg btn-primary">submit</button>
-        <button type="button" id="preprocess" class="btn btn-lg btn-info">Preprocess</button>
-        <button type="button" id="sentiment" class="btn btn-lg btn-warning">Sentiment</button>
-        <a href="\home"><button id="back" type="button" class="btn btn-lg btn-secondary">Back</button></a>
-        
+        <button type="submit" class="btn btn-lg btn-primary">Start Analyzer</button>
+        <a href="\home" style="margin-left:30%"><button id="back" type="button" class="btn btn-lg btn-secondary">Back</button></a>
+        <button id="save" type="button" class="btn btn-lg btn-success" style="margin-left:30%">Save</button></a>
     </div>
-    <div align="right">
-        <button id="save" type="button" class="btn btn-lg btn-success">Save</button></a>
-    </div>
+
     
 </form>
 <br>
 
 <!-- Display area for data read from uploaded file -->
-<div align="center" style="width:fit-content">
+<div align="left" style="width:fit-content">
     <label>Data from uploaded file:</label>
     <pre id="file-data" class="displaydata"></pre>
 </div>
 
 <!-- Display area for data Preprocess -->
-<div align="center" style="width:fit-content">
-    <label>Data after preprocessing:</label>
+<div align="left" style="width:fit-content">
+    <label>Overall reviews sentiment:</label>
+    <pre id="OverallSentiment" class="displaydata"></pre>
 </div>
 
-<table id="process-data" style="border-collapse: collapse; width: 100%;">
+<div align="left" style="width:fit-content">
+    <label>Domain sentences Analysis result:</label>
+    <pre id="Domainsentiment" class="displaydata"></pre>
+</div>
+
+<br/>
+<table id="process-data" style="border-collapse: collapse; width: 100%;caption-side: top;">
+    <caption>Entities feedback summary</caption>
     <thead style="background-color: #f2f2f2;">
         <tr>
             <th >Domain</th>
             <th >Entity</th>
-            <th >Sentence</th>
+            <th >Negative Sentences Amount</th>
+            <th >All Sentences Amount</th>
             <!-- Add more columns as needed based on your DataFrame structure -->
         </tr>
     </thead>
     <tbody></tbody>
 </table>
 
-<div align="center" style="width:fit-content">
-    <label>Sentiment Analysis result:</label>
-    <pre id="sentiment-data" class="displaydata"></pre>
-</div>
 
 
 <!-- JavaScript to send form data to backend and display data from backend response -->
@@ -103,11 +116,15 @@
         }
 
 
- 
+        
         
         document.querySelector('form').addEventListener('submit', function(e) {
             e.preventDefault();
-
+            // Display loading popup
+            var loadingPopup = document.createElement('div');
+            loadingPopup.innerHTML = '<p>Data Processing...</p>';
+            loadingPopup.classList.add('loading-popup');
+            document.body.appendChild(loadingPopup);
             var fileInput = document.getElementById('file');
             var file = fileInput.files[0];
             var textarea = document.getElementById('text');
@@ -116,8 +133,7 @@
                 alert('Error: Please input Description to start.');
                 return;
             }
-          
-
+              
             var formData = new FormData();
             formData.append('file', file);
             formData.append('text', textareaValue);
@@ -129,108 +145,78 @@
             })
             .then(response => response.json())
             .then(data => {
-                
-                var fileDataElement = document.getElementById('file-data');
+                document.body.removeChild(loadingPopup);
+               // Access the returned values from the JSON response
+                var TranslateResult = data.TranslateResult;
+                var OverallResult = data.OverallResult;
+                var Newdomainsentiment = data.Newdomainsentiment;
+                var df_sorted = data.df_sorted;
 
-                // Convert the list of values to an HTML list
-                var listElement = document.createElement('ol');
-                data.forEach(function(item) {
+                 // Update the DOM elements with the retrieved data
+                 var fileDataElement = document.getElementById('file-data');
+                 var OverS = document.getElementById('OverallSentiment');
+                 var DomainS = document.getElementById('Domainsentiment');
+                 var processDataElement = document.querySelector('#process-data tbody');
+ 
+                 fileDataElement.textContent = TranslateResult;
+                 OverS.textContent = OverallResult;
+ 
+                // Process the 'Newdomainsentiment' list
+                var sentimentListElement = document.createElement('ul');
+                Newdomainsentiment.forEach(function(item) {
                     var listItemElement = document.createElement('li');
                     listItemElement.textContent = item;
-                    listElement.appendChild(listItemElement);
+                    sentimentListElement.appendChild(listItemElement);
                 });
+                DomainS.innerHTML = '';
+                DomainS.appendChild(sentimentListElement);
 
-                // Append the HTML list to the file-data element
-                fileDataElement.appendChild(listElement);
+                // Process the 'df_sorted' DataFrame
+                processDataElement.innerHTML = '';
+                df_sorted.forEach(function(row) {
+                    var newRow = document.createElement('tr');
+                    for (var key in row) {
+                        var newCell = document.createElement('td');
+                        newCell.textContent = row[key];
+                        newRow.appendChild(newCell);
+                    }
+                    processDataElement.appendChild(newRow);
+                });
             })
             .catch(error => {
+                document.body.removeChild(loadingPopup);
                 console.error('Error:', error);
             });
         });
 
-        var preprocessData;
-        document.querySelector('#preprocess').addEventListener('click', function() {
-            fetch('/preprocess', {
-                method: 'POST'
-            })
-            .then(response => response.json())
-            .then(data => {
-                preprocessData=data
-                var tableBodyElement = document.querySelector('#process-data tbody');
-            tableBodyElement.innerHTML = ''; // Clear existing table body
-
-            // Iterate through each row in the data
-            data.forEach(function(row) {
-                // Create a new row (TR) element
-                var rowElement = document.createElement('tr');
-
-                // Iterate through each column in the row
-                for (var key in row) {
-                    // Create a new cell (TD) element
-                    var cellElement = document.createElement('td');
-                    cellElement.textContent = row[key];
-                    
-                    // Append the cell to the row
-                    rowElement.appendChild(cellElement);
-                }
-
-                // Append the row to the table body
-                tableBodyElement.appendChild(rowElement);
-                });
-
-                // Append the HTML list to the file-data element
-                })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-  
-        var resulttext;
+        var Desctext;
         var textarea = document.getElementById('text');
         var textareaValue = textarea.value;
-        resulttext="["+textareaValue+"]  ";
-
-        document.querySelector('#sentiment').addEventListener('click', function() {
-
-            var formData = new FormData();
-            formData.append('preprocess',  JSON.stringify(preprocessData));
-            fetch('/sentiment', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                var SentiElement = document.getElementById('sentiment-data');
-
-                // Convert the list of values to an HTML list
-                var listElement = document.createElement('ul');
-                data.forEach(function(item) {
-                    var listItemElement = document.createElement('li');
-                    listItemElement.textContent = item;
-                    resulttext=resulttext+item;
-                    listElement.appendChild(listItemElement);
-                });
-
-                // Append the HTML list to the file-data element
-                SentiElement.appendChild(listElement);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
+        Desctext="["+textareaValue+"]  ";
 
         document.querySelector('#save').addEventListener('click', function() {
 
+            var fileData = document.getElementById('file-data').textContent;
+            var overSentiment = document.getElementById('OverallSentiment').textContent;
+            var domainSentiment = document.getElementById('Domainsentiment').textContent;
+        
+            var resultText =Desctext+ fileData + ' ' + overSentiment + ' ' + domainSentiment;
+        
             var formData = new FormData();
-            formData.append('text',  JSON.stringify(resulttext));
+            formData.append('text', resultText);
+        
             fetch('/savepost', {
                 method: 'POST',
                 body: formData
             })
-            .then(response => response)
+            .then(response => response.json())
             .then(data => {
-                
-                document.getElementById("back").click();
+                if (data.success) {
+                    alert("Evaluation Saved!");
+                    document.getElementById("back").click();
+                } else {
+                    alert("Error occurred while saving the evaluation.");
+                }
             })
             .catch(error => {
                 document.getElementById("back").click();
