@@ -16,7 +16,7 @@ for nlp project
 
  >git clone https://github.com/dtepp/PLP
 
- >cd SMR
+ >cd PLP
 
  >python -m venv venv
 
